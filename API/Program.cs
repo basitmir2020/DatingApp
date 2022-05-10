@@ -1,26 +1,22 @@
-using API.Data;
-using Microsoft.EntityFrameworkCore;
+using API.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+
+//Extension Folder: API\Extensions\ApplicationServiceExtension.cs
+builder.Services.AddApplicationServices(builder.Configuration);
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-//EntityFramework Configuration
-builder.Services.AddDbContext<DataContext>(options=>{
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"));
-});
-
 //Add CORS
-// builder.Services.AddCors(policy=>{
-//     policy.AddPolicy("AllowCors",
-//     builder=>builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
-// });
+builder.Services.AddCors();
 
+//Extension Folder: API\Extensions\IdentityServiceExtension.cs
+builder.Services.AddIdentityService(builder.Configuration);
 
 var app = builder.Build();
 
@@ -39,6 +35,7 @@ app.UseCors(x=>x.AllowAnyHeader()
 .AllowAnyMethod()
 .WithOrigins("https://localhost:4200/"));
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseEndpoints(endpoints =>
