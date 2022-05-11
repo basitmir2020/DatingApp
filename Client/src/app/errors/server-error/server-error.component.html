@@ -1,0 +1,20 @@
+<h4>Internal Server Error Refresh The Page Make The Error Disapper</h4>
+<ng-container *ngIf="error">
+    <h5 class="text-danger"> Error: {{error.message}} </h5>
+    <p class="font-weight-bold">
+        Note: This is a development error page. 
+        The error is not visible to the user. 
+    </p>
+    <p>What to Do Next?</p>
+    <ol>
+        <li>Open the chrome dev tools</li>
+        <li>Inspect The Network tab</li>
+        <li>Examine the Request Url - make sure it is correct</li>
+        <li>Reproduce the error in postman - if the response is same this not the fault in Client Side</li>
+    </ol>
+    <p>Following Is The stack trace - this is where your invetigation start</p>
+    <code class="mt-5" style="background:whitesmoke;">
+        {{error.details}}
+    </code>
+</ng-container>
+
