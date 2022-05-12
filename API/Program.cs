@@ -1,46 +1,33 @@
+using API.Data;
 using API.Extensions;
 using API.Middleware;
+using Microsoft.EntityFrameworkCore;
 
-var builder = WebApplication.CreateBuilder(args);
+namespace API{
+    public class Program{
+        public static async Task Main(string[] args){
+           var host =  CreateHostBuilder(args).Build();
 
-// Add services to the container.
-
-//Extension Folder: API\Extensions\ApplicationServiceExtension.cs
-builder.Services.AddApplicationServices(builder.Configuration);
-
-builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-//Add CORS
-builder.Services.AddCors();
-
-//Extension Folder: API\Extensions\IdentityServiceExtension.cs
-builder.Services.AddIdentityService(builder.Configuration);
-
-var app = builder.Build();
-
-// Configure the HTTP request pipeline.
-app.UseMiddleware<ExceptionMiddleware>();
-
-app.UseSwagger();
-app.UseSwaggerUI();
-
-app.UseHttpsRedirection();
-
-app.UseRouting();
-
-app.UseCors(x=>x.AllowAnyHeader()
-.AllowAnyMethod()
-.AllowAnyOrigin());
-
-app.UseAuthentication();
-app.UseAuthorization();
-
-app.UseEndpoints(endpoints =>
-{
-    endpoints.MapControllers();
-});
-
-app.Run();
+            using var scope = host.Services.CreateScope();
+            var services = scope.ServiceProvider;
+            try
+            {
+                var context = services.GetRequiredService<DataContext>();
+                await context.Database.MigrateAsync();
+                await Seed.SeedUsers(context);
+            }
+            catch (Exception ex)
+            {
+                var logger = services.GetRequiredService<ILogger<Program>>();
+                logger.LogError(ex, "An error occured during migration");
+            }
+            await host.RunAsync();
+        }
+        public static IHostBuilder CreateHostBuilder(string[] args) =>
+        Host.CreateDefaultBuilder(args)
+            .ConfigureWebHostDefaults(webBuilder =>
+                {
+                   webBuilder.UseStartup<StartUp>();
+                });
+    }
+}
